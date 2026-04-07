@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --bg-color: #0c0f14;
+      --sidebar-bg: rgba(18, 22, 28, 0.75);
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --text-main: #f8fafc;
+      --text-muted: #8b9bb4;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --sidebar-width: 280px;
+      --sidebar-collapsed-width: 88px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      display: flex;
+      height: 100vh;
+      background: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    /* Toggle Checkbox */
+    #toggle {
+      display: none;
+    }
+
+    /* Sidebar Base */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      z-index: 10;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    }
+
+    #toggle:checked ~ .sidebar {
+      width: var(--sidebar-collapsed-width);
+    }
+
+    /* Header & Logo */
+    .sidebar-header {
+      height: 88px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border-color);
+      transition: padding 0.4s ease;
+    }
+
+    #toggle:checked ~ .sidebar .sidebar-header {
+      padding: 0 16px;
+      justify-content: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+      position: relative;
+    }
+    
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+      opacity: 1;
+      transition: opacity 0.3s ease, width 0.3s ease;
+    }
+
+    #toggle:checked ~ .sidebar .logo-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+
+    /* Menu Area */
+    .menu {
+      list-style: none;
+      padding: 32px 20px;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .menu::-webkit-scrollbar {
+      width: 4px;
+    }
+    .menu::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    .menu-group {
+      margin-bottom: 32px;
+    }
+
+    .menu-group-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-left: 14px;
+      white-space: nowrap;
+      font-weight: 600;
+      transition: opacity 0.3s ease;
+    }
+
+    #toggle:checked ~ .sidebar .menu-group-title {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .menu li {
+      margin-bottom: 10px;
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      padding: 14px;
+      border-radius: 14px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .menu a:hover, .menu a.active {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(4px);
+    }
+
+    .menu a.active {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+    }
+
+    .menu a.active::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 24px;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .menu i {
+      font-size: 24px;
+      min-width: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .menu a:hover i {
+      transform: scale(1.1);
+    }
+
+    .menu span {
+      margin-left: 16px;
+      font-weight: 500;
+      font-size: 15px;
+      white-space: nowrap;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #toggle:checked ~ .sidebar .menu span {
+      opacity: 0;
+      transform: translateX(-10px);
+      width: 0;
+      margin: 0;
+    }
+
+    /* Profile Widget */
+    .profile-card {
+      margin: 20px;
+      padding: 16px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .profile-card:hover {
+      background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    #toggle:checked ~ .sidebar .profile-card {
+      padding: 12px;
+      margin: 20px 12px;
+      justify-content: center;
+      border-radius: 16px;
+    }
+
+    .profile-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-info {
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.3s ease;
+    }
+
+    #toggle:checked ~ .sidebar .profile-info {
+      opacity: 0;
+      width: 0;
+    }
+
+    .profile-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .profile-role {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Main Interface */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .topbar {
+      height: 88px;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(12, 15, 20, 0.5);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 5;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .menu-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .menu-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #f8fafc, #94a3b8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .action-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .action-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px var(--bg-color);
+    }
+
+    /* Dashboard Content Area */
+    .content-area {
+      padding: 40px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--border-color);
+      padding: 28px;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), #a855f7);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .trend {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    .trend.up { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .trend.down { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+    .stat-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -1px;
+      color: white;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    /* Main Chart Area - Mockup */
+    .chart-container {
+      background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      min-height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
+    }
+
+    .chart-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Responsive Constraints */
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: absolute;
+        height: 100%;
+        left: -100%;
+        transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 50;
+      }
+      #toggle:checked ~ .sidebar {
+        left: 0;
+        width: var(--sidebar-width);
+      }
+      #toggle:checked ~ .main {
+        opacity: 0.4;
+        pointer-events: none;
+        filter: blur(2px);
+      }
+      .topbar { padding: 0 20px; }
+      .content-area { padding: 20px; }
+    }
+
+    /* Page Navigation Sections */
+    .page-section {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+    
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hidden Checkbox for Sidebar Toggle -->
+  <input type="checkbox" id="toggle">
+
+  <!-- Sidebar Component -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="#" class="logo-container">
+        <div class="logo-icon">
+          <i class="ph-bold ph-hexagon"></i>
+        </div>
+        <span class="logo-text">NexusUI</span>
+      </a>
+    </div>
+
+    <ul class="menu">
+      <div class="menu-group">
+        <div class="menu-group-title">Overview</div>
+        <li>
+          <a href="#" class="active">
+            <i class="ph ph-squares-four"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="ph ph-chart-polar"></i>
+            <span>Analytics</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="ph ph-wallet"></i>
+            <span>Wallet</span>
+          </a>
+        </li>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-group-title">Business</div>
+        <li>
+          <a href="#">
+            <i class="ph ph-users-three"></i>
+            <span>Audience</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="ph ph-shopping-bag"></i>
+            <span>Products</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="ph ph-receipt"></i>
+            <span>Invoices</span>
+          </a>
+        </li>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-group-title">Configuration</div>
+        <li>
+          <a href="#">
+            <i class="ph ph-gear-six"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="ph ph-shield-check"></i>
+            <span>Security</span>
+          </a>
+        </li>
+      </div>
+    </ul>
+
+    <div class="profile-card">
+      <div class="profile-info">
+        <div class="profile-name">BHANU PRAKASH</div>
+        <div class="profile-role">Product Designer</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <label for="toggle" class="menu-btn">
+          <i class="ph ph-list"></i>
+        </label>
+        <h1 class="page-title">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="action-btn">
+          <i class="ph ph-magnifying-glass"></i>
+        </div>
+        <div class="action-btn">
+          <i class="ph ph-bell"></i>
+          <span class="badge"></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- Dashboard Page -->
+      <div id="page-Dashboard" class="page-section active">
+        <div class="dashboard-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">
+                <i class="ph ph-currency-dollar"></i>
+              </div>
+              <div class="trend up">
+                <i class="ph-bold ph-trend-up"></i>
+                <span>+12.5%</span>
+              </div>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">$42,592.00</div>
+              <div class="stat-label">Total Revenue</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">
+                <i class="ph ph-users"></i>
+              </div>
+              <div class="trend up">
+                <i class="ph-bold ph-trend-up"></i>
+                <span>+8.2%</span>
+              </div>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">2,845</div>
+              <div class="stat-label">Active Users</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e; border-color: rgba(244, 63, 94, 0.2);">
+                <i class="ph ph-fire"></i>
+              </div>
+              <div class="trend down">
+                <i class="ph-bold ph-trend-down"></i>
+                <span>-2.4%</span>
+              </div>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">4.2%</div>
+              <div class="stat-label">Bounce Rate</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <i class="ph-duotone ph-chart-line-up" style="font-size: 80px; color: var(--border-color);"></i>
+          <div style="color: var(--text-muted); font-size: 18px; font-weight: 500;">Interactive Chart Area</div>
+          <p style="color: rgba(139, 155, 180, 0.6); max-width: 400px; text-align: center; font-size: 14px;">Placeholder for main data visualization. In production, this would host a dynamic chart powered by Chart.js or D3.</p>
+        </div>
+      </div>
+      
+      <!-- Generic Placeholder Page for other tabs -->
+      <div id="page-Placeholder" class="page-section">
+        <div class="chart-container" style="min-height: 400px;">
+          <i class="ph-duotone ph-sparkle" style="font-size: 80px; color: var(--border-color);"></i>
+          <div style="color: var(--text-muted); font-size: 18px; font-weight: 500;" id="placeholder-title">Page Content</div>
+          <p style="color: rgba(139, 155, 180, 0.6); max-width: 400px; text-align: center; font-size: 14px;">This is a dynamically loaded page section based on your sidebar selection.</p>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Sidebar Menu Interactivity
+      const menuLinks = document.querySelectorAll('.menu a');
+      const pageTitle = document.querySelector('.page-title');
+      
+      menuLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault(); // Prevent page reload
+          
+          // Remove active class from all links
+          menuLinks.forEach(el => el.classList.remove('active'));
+          
+          // Add active class to clicked link
+          link.classList.add('active');
+          
+          // Update the top page title to match the clicked item
+          const titleContent = link.querySelector('span').textContent;
+          if (pageTitle) {
+             pageTitle.textContent = titleContent;
+          }
+          
+          // Manage Page Sections
+          const allPages = document.querySelectorAll('.page-section');
+          allPages.forEach(page => page.classList.remove('active'));
+          
+          const targetPageId = 'page-' + titleContent;
+          const targetPage = document.getElementById(targetPageId);
+          
+          if (targetPage) {
+            targetPage.classList.add('active');
+          } else {
+            // Fallback placeholder logic
+            const placeholder = document.getElementById('page-Placeholder');
+            if(placeholder) {
+                placeholder.classList.add('active');
+                document.getElementById('placeholder-title').textContent = titleContent + ' Page';
+            }
+          }
+        });
+      });
+
+      // 2. Action Buttons (Search & Notifications) Interactivity
+      const actionBtns = document.querySelectorAll('.action-btn');
+      if (actionBtns.length >= 2) {
+        // Search Button
+        actionBtns[0].addEventListener('click', () => {
+          alert('Search panel would open here!');
+        });
+        
+        // Notifications Button
+        actionBtns[1].addEventListener('click', (e) => {
+          alert('You have new notifications!');
+          // Hide the red badge after clicking
+          const badge = e.currentTarget.querySelector('.badge');
+          if(badge) badge.style.display = 'none';
+        });
+      }
+
+      // 3. Profile Card Interactivity
+      const profileCard = document.querySelector('.profile-card');
+      if (profileCard) {
+        profileCard.addEventListener('click', () => {
+           alert("Opening BHANU PRAKASH's profile settings...");
+        });
+      }
+      
+      // 4. Logo Interactivity (Reset to Dashboard)
+      const logo = document.querySelector('.logo-container');
+      if (logo) {
+        logo.addEventListener('click', (e) => {
+          e.preventDefault();
+          menuLinks.forEach(el => el.classList.remove('active'));
+          if (menuLinks[0]) menuLinks[0].classList.add('active');
+          if (pageTitle) pageTitle.textContent = 'Dashboard';
+          
+          const allPages = document.querySelectorAll('.page-section');
+          allPages.forEach(page => page.classList.remove('active'));
+          const targetPage = document.getElementById('page-Dashboard');
+          if(targetPage) targetPage.classList.add('active');
+        });
+      }
+
+      // 5. Collapsible Menu Groups (Overview, Business, Configuration)
+      const menuGroupTitles = document.querySelectorAll('.menu-group-title');
+      menuGroupTitles.forEach(title => {
+        title.style.cursor = 'pointer';
+        title.title = 'Click to collapse/expand menu section';
+        title.addEventListener('click', () => {
+          const group = title.parentElement;
+          const items = group.querySelectorAll('li');
+          
+          group.classList.toggle('collapsed');
+          const isCollapsed = group.classList.contains('collapsed');
+          
+          // Toggle visibility of the list items under this group
+          items.forEach(item => {
+            item.style.display = isCollapsed ? 'none' : 'block';
+          });
+          
+          // Optionally fade the title to show it's collapsed
+          title.style.opacity = isCollapsed ? '0.5' : '1';
+        });
+      });
+    });
+  </script>
+</body>
+</html>
